@@ -32,10 +32,9 @@ Open dsh web → **Settings → 视觉模型**:
 | Preset | Provider | Key env | Price |
 |---|---|---|---|
 | `opencode-zen` | OpenCode Zen | _(keyless)_ | free tier |
-| `ollama` | local Ollama (`ollama run qwen2.5vl:7b`) | _(keyless)_ | free, local |
 | `gemini-flash` | Google AI Studio (OpenAI-compat) | `GEMINI_API_KEY` | free tier |
 
-The keyless presets need nothing but the save button. Gemini Flash is free-tier with a signup key; the preset saves you from finding the right baseUrl + model id + API dialect. Any other OpenAI-compatible or MiniMax endpoint still works: set model / baseUrl / API type in the advanced section.
+The keyless preset needs nothing but the save button. Gemini Flash is free-tier with a signup key; the preset saves you from finding the right baseUrl + model id + API dialect. Any other OpenAI-compatible or MiniMax endpoint still works: set model / baseUrl / API type in the advanced section.
 
 ### Headless / no-GUI fallback
 
