@@ -2,7 +2,7 @@
 //  1. multi-image batch → single request with N image_url parts
 //  2. auth header + model + max_tokens forwarded
 //  3. keyless preset → no Authorization header, ready=true without key
-//  4. minimax backend → bounded concurrency (≤3 in flight), order preserved
+//  
 //  5. unsupported extension (heic) → clear per-image error, no mislabel
 //  6. config derivation (preset defaults, keyless ready)
 //  7. store dedup + LRU basics + TMP_DIR naming
@@ -81,44 +81,11 @@ if (sawAuth !== null) throw new Error('keyless call must not send Authorization,
 const nokey = deriveConfig({ provider: 'gemini-flash' })
 if (nokey.ready !== false) throw new Error('gemini preset without key must not be ready')
 
-// 4. minimax concurrency: 6 images, 200ms per call, concurrency ≤ 3
-let inFlight = 0
-let maxInFlight = 0
-let miniCalls = 0
-const miniServer = http.createServer((req, res) => {
-  miniCalls++
-  inFlight++
-  maxInFlight = Math.max(maxInFlight, inFlight)
-  req.resume()
-  req.on('end', () => {
-    setTimeout(() => {
-      inFlight--
-      res.writeHead(200, { 'content-type': 'application/json' })
-      res.end(JSON.stringify({ content: 'mini-desc' }))
-    }, 200)
-  })
-})
-await new Promise((resolve) => miniServer.listen(0, '127.0.0.1', resolve))
-const miniPort = miniServer.address().port
-const miniConfig = deriveConfig({ provider: 'custom', apiType: 'minimax', baseUrl: `http://127.0.0.1:${miniPort}`, model: 'm', apiKey: 'k' })
-const miniStart = Date.now()
-const miniResult = await analyzeImages(
-  miniConfig,
-  [saved1.filePath, saved1.filePath, saved1.filePath, saved1.filePath, saved1.filePath, saved1.filePath],
-  undefined,
-)
-const miniElapsed = Date.now() - miniStart
-if (miniCalls !== 6) throw new Error('minimax expected 6 calls, got ' + miniCalls)
-if (maxInFlight > 3) throw new Error('minimax concurrency exceeded 3: ' + maxInFlight)
-if (miniElapsed > 900) throw new Error('minimax should run ~2 waves (~400ms), took ' + miniElapsed)
-if (!miniResult.includes('--- Image 3 ---')) throw new Error('minimax order/labels broken')
-miniServer.close()
-
-// 5. heic/unknown extension rejected clearly
+// 4. heic/unknown extension rejected clearly
 const badResult = await analyzeImages(config, ['/tmp/x.heic'], undefined)
 if (!badResult.includes('unsupported image extension')) throw new Error('heic must be rejected clearly: ' + badResult)
 
-// 6. env override beats preset default
+// 5. env override beats preset default
 process.env.DSH_SIGHT_PROVIDER = 'gemini-flash'
 const base = buildBaseConfig({})
 if (base.provider !== 'gemini-flash') throw new Error('env override failed')

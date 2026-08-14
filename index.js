@@ -2,9 +2,8 @@
 //
 // A dsh port of the opencode "vision-helper" design, with two additions:
 //
-//  1. Built-in VLM presets (GLM-4V-Flash, Gemini Flash, OpenCode Zen,
-//     MiMo-V2.5, GPT-4o-mini, custom) — pick one in the web settings page,
-//     fill a key, done.
+//  1. Built-in VLM presets (OpenCode Zen keyless, Gemini Flash) — pick one
+//     in the web settings page, done.
 //  2. Multi-image batch analysis — the `vision` tool takes N paths and
 //     describes them in ONE request.
 //

@@ -77,7 +77,7 @@ const tool = registrations.tools[0]
 if (tool.name !== 'vision') throw new Error('tool name wrong: ' + tool.name)
 if (!tool.parameters?.properties?.paths?.items) throw new Error('paths array schema missing')
 if (tool.parameters.required?.[0] !== 'paths') throw new Error('paths not required')
-if (!(tool.timeoutMs > 150_000)) throw new Error('tool timeout must cover minimax batch waves')
+if (!(tool.timeoutMs >= 150_000)) throw new Error('tool timeout backstop wrong: ' + tool.timeoutMs)
 
 // 2. system prompt section references the real TMP_DIR
 if (registrations.sections.length !== 1) throw new Error('system prompt section missing')

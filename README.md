@@ -2,13 +2,13 @@
 
 Plug-in vision for text-only [DeepSeek Harness (dsh)](https://github.com/deepseek-ai/deepseek-harness) models. A dsh port of the opencode `vision-helper` pattern, with two upgrades:
 
-- **Built-in VLM presets** — GLM-4V-Flash (free), Gemini Flash (free tier), OpenCode Zen (free, keyless), MiMo-V2.5, GPT-4o-mini, and more. Pick one in the web settings page, fill a key, done.
+- **Built-in VLM presets** — OpenCode Zen (free, keyless) and Gemini Flash (free tier). Pick one in the web settings page, done.
 - **Multi-image batch** — the `vision` tool takes N paths/URLs and describes all of them in a single request, labeled per image.
 
 ## How it works
 
 1. **Prompt-admission override** — dsh's DeepSeek adapter refuses image pastes at intake (text-only). dsh-sight wraps `apiProxy.sessions.prompt`: a paste for a text-only model is accepted, the image lands in `/tmp/dsh-sight/image{N}/{hash}.png`, and the image block becomes a path hint before the message enters history. Works with ANY provider — no model variant to switch.
-2. **`vision` tool** — the model calls it with the hint path (or any local path / http(s) URL); the plugin reads the bytes and answers through the configured VLM backend (OpenAI-compatible or MiniMax native).
+2. **`vision` tool** — the model calls it with the hint path (or any local path / http(s) URL); the plugin reads the bytes and answers through the configured OpenAI-compatible VLM backend.
 3. **System-prompt section** — teaches the model the hint → `vision` tool flow.
 4. **Web settings page** (Settings → 视觉模型) — preset dropdown, API-key field, advanced overrides. Saved through the standard settings RPC; applied **live, no restart** (hot-reload via the `dsh-sight:` section of `$DSH_HOME/settings.yaml`).
 
@@ -34,7 +34,7 @@ Open dsh web → **Settings → 视觉模型**:
 | `opencode-zen` | OpenCode Zen | _(keyless)_ | free tier |
 | `gemini-flash` | Google AI Studio (OpenAI-compat) | `GEMINI_API_KEY` | free tier |
 
-The keyless preset needs nothing but the save button. Gemini Flash is free-tier with a signup key; the preset saves you from finding the right baseUrl + model id + API dialect. Any other OpenAI-compatible or MiniMax endpoint still works: set model / baseUrl / API type in the advanced section.
+The keyless preset needs nothing but the save button. Gemini Flash is free-tier with a signup key; the preset saves you from finding the right baseUrl + model id + API dialect. Any other OpenAI-compatible endpoint still works: set model / baseUrl in the advanced section.
 
 ### Headless / no-GUI fallback
 
@@ -59,15 +59,13 @@ The `vision` tool's `paths` array takes up to 10 images per call (local paths or
 <description>
 ```
 
-(MiniMax's native VLM endpoint is single-image; the plugin runs it with bounded concurrency and joins with the same labels.)
-
 ## Comparison with modlens
 
 | | modlens | dsh-sight |
 |---|---|---|
 | Engine | bundled CLI (own release cadence) | inline in the plugin |
 | Output | structured 5-part evidence schema | plain descriptions (+ batch labels) |
-| Models | antigravity-cli / gemini / openai / anthropic / claude-cli | presets incl. GLM-4V-Flash, Zen free tier, MiMo-V2.5 |
+| Models | antigravity-cli / gemini / openai / anthropic / claude-cli | OpenCode Zen keyless + Gemini Flash presets |
 | Multi-image | one per call | batch up to 10 in one request |
 | Paste intake | client.js paste-to-path + provider wrapper | prompt-admission override (any provider, no variant) |
 | Config | `~/.modlens/config.json` | web settings page + settings.yaml + env/file fallbacks |
@@ -76,7 +74,7 @@ The `vision` tool's `paths` array takes up to 10 images per call (local paths or
 
 ```sh
 pnpm install                 # plugin-local deps (schemastery, dsh-settings)
-node test/engine-smoke.mjs   # engine: batch, keyless, minimax concurrency
+node test/engine-smoke.mjs   # engine: batch, keyless, extension guard
 node test/plugin-apply.mjs   # registrations: tool, admission override, settings wiring
 dsh plugin --profile test add ./   # local install
 dsh --profile test --dump-config   # verify the layer
