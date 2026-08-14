@@ -2,16 +2,17 @@
 
 Plug-in vision for text-only [DeepSeek Harness (dsh)](https://github.com/deepseek-ai/deepseek-harness) models. A dsh port of the opencode `vision-helper` pattern, with two upgrades:
 
-- **Built-in VLM presets** — GLM-4V-Flash (free), Gemini Flash (free tier), OpenCode Zen (free tier), MiMo-V2.5, GPT-4o-mini, and more. Fill one API key, pick a preset id; no baseUrl/model assembly.
+- **Built-in VLM presets** — GLM-4V-Flash (free), Gemini Flash (free tier), OpenCode Zen (free, keyless), MiMo-V2.5, GPT-4o-mini, and more. Pick one in the web settings page, fill a key, done.
 - **Multi-image batch** — the `vision` tool takes N paths/URLs and describes all of them in a single request, labeled per image.
 
 ## How it works
 
-1. **`vision` tool** — the model calls it with local file paths or http(s) URLs; the plugin reads the bytes and answers through the configured VLM backend (OpenAI-compatible or MiniMax native).
-2. **Vision provider wrapper** (`deepseek-vision`) — dsh's DeepSeek adapter refuses image pastes at intake (text-only). This plugin registers a wrapped model variant that admits images, saves each paste to `/tmp/dsh-sight/image{N}/{hash}.png`, and replaces the image block with a path hint before delegating back upstream. The durable log keeps the real image; only the wire message changes.
+1. **Prompt-admission override** — dsh's DeepSeek adapter refuses image pastes at intake (text-only). dsh-sight wraps `apiProxy.sessions.prompt`: a paste for a text-only model is accepted, the image lands in `/tmp/dsh-sight/image{N}/{hash}.png`, and the image block becomes a path hint before the message enters history. Works with ANY provider — no model variant to switch.
+2. **`vision` tool** — the model calls it with the hint path (or any local path / http(s) URL); the plugin reads the bytes and answers through the configured VLM backend (OpenAI-compatible or MiniMax native).
 3. **System-prompt section** — teaches the model the hint → `vision` tool flow.
+4. **Web settings page** (Settings → 视觉模型) — preset dropdown, API-key field, advanced overrides. Saved through the standard settings RPC; applied **live, no restart** (hot-reload via the `dsh-sight:` section of `$DSH_HOME/settings.yaml`).
 
-No build step, no runtime dependencies (plain ESM + Node builtins), so `dsh plugin add github:…` works without pnpm build permissions.
+No build step, no runtime dependencies beyond two dsh packages — plain ESM, so `dsh plugin add github:…` works without pnpm build permissions.
 
 ## Install
 
@@ -21,72 +22,36 @@ dsh plugin --profile web add github:fu3rte/dsh-sight
 
 (or publish to npm and `dsh plugin --profile web add dsh-sight`)
 
-## Configure a preset
+## Configure
 
-Minimal setup: pick a preset id and export its key.
+Open dsh web → **Settings → 视觉模型**:
 
-| Preset id | Provider | API key env | Price |
+1. Pick a preset from the dropdown (model / base URL / API type fill themselves).
+2. Paste the API key, hit 保存 — applied immediately.
+
+| Preset | Provider | Key env | Price |
 |---|---|---|---|
 | `glm-4v-flash` | Zhipu BigModel | `ZHIPU_API_KEY` | free |
 | `gemini-flash` | Google AI Studio (OpenAI-compat) | `GEMINI_API_KEY` | free tier |
-| `opencode-zen` | OpenCode Zen | `ZEN_API_KEY` | free tier |
+| `opencode-zen` | OpenCode Zen | _(keyless)_ | free tier |
 | `mimo-v2.5` | MiniMax (native VLM endpoint) | `MINIMAX_API_KEY` | ¥1/¥2 per M tokens |
 | `gpt-4o-mini` | OpenAI | `OPENAI_API_KEY` | $0.15/$0.60 |
 | `opencode-zen-go` | OpenCode Zen Go ($10/mo) | `ZEN_API_KEY` | mimo-v2.5, minimax-m3, gpt-5.6-luna… |
 | `custom` | any OpenAI-compatible endpoint | `DSH_SIGHT_API_KEY` | — |
 
-```sh
-export ZHIPU_API_KEY=sk-xxxx   # example: GLM-4V-Flash
-```
+### Headless / no-GUI fallback
 
-Then use dsh normally. Pasting an image, or pointing the model at a file, routes through the vision bridge.
+The same config works without the web UI. Layers (highest wins):
 
-### Config file
+1. `settings.yaml` `dsh-sight:` section (hot-reloads on edit)
+2. `DSH_SIGHT_*` env vars (`DSH_SIGHT_PROVIDER`, `DSH_SIGHT_API_KEY`, `DSH_SIGHT_MODEL`, `DSH_SIGHT_BASE_URL`, `DSH_SIGHT_API_TYPE`, `DSH_SIGHT_TIMEOUT_MS`, `DSH_SIGHT_MAX_TOKENS`, `DSH_SIGHT_MAX_IMAGES`, `DSH_SIGHT_CONFIG`)
+3. `~/.config/dsh-sight/config.json` (re-read on mtime change)
+4. plugin row config in the profile's `cordis.patch.yml`
+5. preset defaults
 
-`~/.config/dsh-sight/config.json` (keep it `chmod 600`):
+The API key is `role('secret')`: it never rides a settings response; the UI renders a write-only field and reports whether one is stored.
 
-```json
-{
-  "provider": "opencode-zen-go",
-  "apiKey": "sk-…",
-  "model": "minimax-m3",
-  "baseUrl": "https://opencode.ai/zen/go/v1",
-  "apiType": "openai",
-  "timeoutMs": 120000,
-  "maxTokens": 4096,
-  "toolName": "vision",
-  "visionProvider": true,
-  "systemPrompt": true
-}
-```
-
-Priority: **env > config file > plugin row config > preset defaults**. The file is re-read on mtime change — edits apply on the next tool call, no restart.
-
-### Environment variables
-
-| Var | Meaning |
-|---|---|
-| `DSH_SIGHT_PROVIDER` | preset id or `custom` |
-| `DSH_SIGHT_API_KEY` | explicit key (beats the preset's own env) |
-| `DSH_SIGHT_MODEL` / `DSH_SIGHT_BASE_URL` / `DSH_SIGHT_API_TYPE` | overrides (`openai` \| `minimax`) |
-| `DSH_SIGHT_TIMEOUT_MS` / `DSH_SIGHT_MAX_TOKENS` | engine tuning |
-| `DSH_SIGHT_MAX_IMAGES` | LRU cap of stored pastes (default 200) |
-| `DSH_SIGHT_CONFIG` | config file path override |
-
-### Plugin row config
-
-In your profile's `cordis.patch.yml` you can also set defaults:
-
-```yaml
-- id: dsh-sight
-  name: dsh-sight
-  config:
-    provider: glm-4v-flash
-    toolName: vision
-    visionProvider: true
-```
-
-## Multi-image batch
+### Multi-image batch
 
 The `vision` tool's `paths` array takes up to 10 images per call (local paths or URLs, 25 MiB each). One request, per-image labels:
 
@@ -97,11 +62,9 @@ The `vision` tool's `paths` array takes up to 10 images per call (local paths or
 <description>
 ```
 
-(MiniMax's native VLM endpoint is single-image; the plugin loops and joins with the same labels.)
+(MiniMax's native VLM endpoint is single-image; the plugin runs it with bounded concurrency and joins with the same labels.)
 
 ## Comparison with modlens
-
-[dsh-sight](https://github.com/fu3rte/dsh-sight) is the modlens-for-dsh alternative with a smaller footprint (no CLI, no electron spawn, no separate engine install):
 
 | | modlens | dsh-sight |
 |---|---|---|
@@ -109,13 +72,17 @@ The `vision` tool's `paths` array takes up to 10 images per call (local paths or
 | Output | structured 5-part evidence schema | plain descriptions (+ batch labels) |
 | Models | antigravity-cli / gemini / openai / anthropic / claude-cli | presets incl. GLM-4V-Flash, Zen free tier, MiMo-V2.5 |
 | Multi-image | one per call | batch up to 10 in one request |
-| Paste intake | client.js paste-to-path + provider wrapper | provider wrapper (no browser half) |
+| Paste intake | client.js paste-to-path + provider wrapper | prompt-admission override (any provider, no variant) |
+| Config | `~/.modlens/config.json` | web settings page + settings.yaml + env/file fallbacks |
 
 ## Development
 
 ```sh
-dsh plugin --profile test add ./            # local install
-dsh --profile test --dump-config            # verify the layer
+pnpm install                 # plugin-local deps (schemastery, dsh-settings)
+node test/engine-smoke.mjs   # engine: batch, keyless, minimax concurrency
+node test/plugin-apply.mjs   # registrations: tool, admission override, settings wiring
+dsh plugin --profile test add ./   # local install
+dsh --profile test --dump-config   # verify the layer
 ```
 
 License: MIT
