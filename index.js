@@ -1,26 +1,6 @@
-// dsh-sight — plug-in vision for text-only dsh models.
-//
-// A dsh port of the opencode "vision-helper" design, with two additions:
-//
-//  1. Built-in VLM presets (OpenCode Zen keyless, Gemini Flash) — pick one
-//     in the web settings page, done.
-//  2. Multi-image batch analysis — the `vision` tool takes N paths and
-//     describes them in ONE request.
-//
-// Wiring:
-//  - `vision` tool (raw JSON-Schema, zero dsh-tools dependency) reads local
-//    files or http(s) URLs and answers through the configured VLM backend.
-//  - Prompt-admission override: `apiProxy.sessions.prompt` is wrapped so a
-//    pasted image is accepted even when the active model is text-only — the
-//    bytes land in /tmp/dsh-sight/ and the image block becomes a path hint
-//    before the message enters history (the model request never carries
-//    image blocks). Works with ANY provider; no model variant to switch.
-//  - Settings section: config lives in the `dsh-sight:` namespace of
-//    settings.yaml (web page edits it; `role('secret')` API key never rides
-//    a response). installSettingsSection hot-reloads it into every tool call.
-//
-// Config layers: settings.yaml > DSH_SIGHT_* env > ~/.config/dsh-sight/
-// config.json > plugin row config > preset defaults.
+// dsh-sight — plug-in vision for text-only dsh models: a `vision` tool, a
+// prompt-admission override (pasted images become path hints), and a
+// hot-reloaded settings section. Config layering lives in lib/config.js.
 
 import { settingsNamespace, installSettingsSection } from '@deepseek-ai/dsh-settings'
 import { ensureTmpDir, setMaxImages, saveImage, TMP_DIR, MEDIA_EXT } from './lib/store.js'
@@ -44,10 +24,8 @@ export function apply(ctx, rowConfig = {}) {
     },
     onChange: () => {},
   })
-  // Expose the `dsh-sight:` settings namespace to configuration clients (the
-  // web settings page): the api proxy's exposed-namespace set is derived from
-  // the configurable-provider directory, so a dormant directory row for our
-  // own namespace makes settings.describe / settings.update accept it.
+  // Register a dormant directory row so the api proxy exposes our settings
+  // namespace to configuration clients (the web settings page).
   if (typeof ctx.llm?.registerConfigurableProviders === 'function') {
     try {
       ctx.effect(() => ctx.llm.registerConfigurableProviders([{
@@ -104,20 +82,11 @@ function registerVisionTool(ctx, getConfig, preferred) {
 
 // ── Prompt-admission override ──────────────────────────────────────────────
 
-/**
- * Override the host `session.prompt` admission so pasted images are accepted
- * even when the active model is text-only: each image block is saved to the
- * landing store and replaced by a path hint before the message enters
- * history, so the model request never carries image blocks and the
- * provider's modality gate cannot reject the turn. Image-capable routes pass
- * through untouched. The wrapper installs as a plain method replacement on
- * the apiProxy sessions object and restores the original on dispose.
- *
- * `session.selectModel` is wrapped as well: the host keeps the in-process
- * model switch in a private map, so this plugin mirrors each session's switch
- * to decide the admission path accurately even right after a switch, before
- * any request header is logged.
- */
+// Wrap `apiProxy.sessions.prompt` so pasted images are accepted for text-only
+// models: bytes land in the store and become a path hint before entering
+// history, so the provider's modality gate never rejects the turn. Also wraps
+// `selectModel`, mirroring each session's switch (the host keeps the
+// in-process model choice in a private map).
 function installPromptAdmission(ctx, getConfig) {
   if (typeof ctx.inject !== 'function') return
   ctx.inject(['apiProxy'], (apiCtx) => {
@@ -206,7 +175,6 @@ function installPromptAdmissionOverride(ctx, getConfig) {
   }
 }
 
-/** Save one pasted image part (base64 payload) into the landing store. */
 function savePastedImage(part) {
   const mediaType = part?.mediaType
   if (typeof part?.data !== 'string' || part.data.length === 0) {
@@ -223,7 +191,7 @@ function savePastedImage(part) {
   return { ok: true, ...saved }
 }
 
-/** The active route of one session, mirroring the admission gate's precedence. */
+// The active route of one session, mirroring the admission gate's precedence.
 function currentModelOf(agent, agentDefaultModel, picked) {
   if (picked !== undefined && picked.provider !== undefined && picked.model !== undefined) {
     return picked

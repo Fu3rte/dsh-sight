@@ -122,8 +122,6 @@ if (degraded.type !== 'text' || !degraded.text.includes('could not be read by ds
 disposers.forEach((dispose) => {
   try { dispose() } catch {}
 })
-// (method identity restore is checked implicitly: the wrapper replaced the
-// bound original; after dispose the original bound function is back)
 
 // 4. tool execute runs the engine against a live mock backend
 const http = await import('node:http')
