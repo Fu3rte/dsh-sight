@@ -155,13 +155,13 @@ const execResult = await testTool.execute({ paths: [imgPath] }, {})
 if (execResult !== 'a red pixel') throw new Error('tool execute failed: ' + execResult)
 
 // unready preset must throw and name the missing key
-const unreadyTool = buildVisionTool(() => deriveConfig({ provider: 'glm-4v-flash' }), 'vision')
+const unreadyTool = buildVisionTool(() => deriveConfig({ provider: 'gemini-flash' }), 'vision')
 let threw = false
 try {
   await unreadyTool.execute({ paths: [imgPath] }, {})
 } catch (e) {
   threw = true
-  if (!String(e.message).includes('ZHIPU_API_KEY')) throw new Error('unready error should name the missing key')
+  if (!String(e.message).includes('GEMINI_API_KEY')) throw new Error('unready error should name the missing key')
 }
 if (!threw) throw new Error('unready config should throw')
 

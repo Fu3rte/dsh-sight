@@ -78,8 +78,8 @@ if (!keylessResult.includes('Image 1 description')) throw new Error('keyless cal
 if (sawAuth !== null) throw new Error('keyless call must not send Authorization, got ' + sawAuth)
 
 // 3b. non-keyless preset without key → ready=false
-const nokey = deriveConfig({ provider: 'glm-4v-flash' })
-if (nokey.ready !== false) throw new Error('glm preset without key must not be ready')
+const nokey = deriveConfig({ provider: 'gemini-flash' })
+if (nokey.ready !== false) throw new Error('gemini preset without key must not be ready')
 
 // 4. minimax concurrency: 6 images, 200ms per call, concurrency ≤ 3
 let inFlight = 0
@@ -119,9 +119,9 @@ const badResult = await analyzeImages(config, ['/tmp/x.heic'], undefined)
 if (!badResult.includes('unsupported image extension')) throw new Error('heic must be rejected clearly: ' + badResult)
 
 // 6. env override beats preset default
-process.env.DSH_SIGHT_PROVIDER = 'gpt-4o-mini'
+process.env.DSH_SIGHT_PROVIDER = 'gemini-flash'
 const base = buildBaseConfig({})
-if (base.provider !== 'gpt-4o-mini') throw new Error('env override failed')
+if (base.provider !== 'gemini-flash') throw new Error('env override failed')
 delete process.env.DSH_SIGHT_PROVIDER
 setMaxImages(5)
 if (buildBaseConfig({ maxImages: 9 }).maxImages !== 9) throw new Error('row config maxImages failed')
