@@ -20,19 +20,17 @@
 
 ## 效果演示
 
-一次性粘贴两张 awwwards 截图，单次批量请求完成描述：
-
-<p align="center">
-  <img src="assets/demo/demo4.png" width="640" alt="dsh-sight 工作流" />
-</p>
-
 <p align="center">
   <img src="assets/demo/demo1.png" width="300" alt="粘贴截图 1" />
   <img src="assets/demo/demo2.png" width="300" alt="粘贴截图 2" />
 </p>
 
 <p align="center">
-  <img src="assets/demo/demo3.png" width="640" alt="模型描述输出" />
+  <img src="assets/demo/demo.png" width="640" alt="dsh-sight 工作流" />
+</p>
+
+<p align="center">
+  <img src="assets/demo/result.png" width="640" alt="模型描述输出" />
 </p>
 
 `vision` 工具的 `paths` 数组每次最多 10 张（本地路径或 URL，单张上限 25 MiB）。一次请求，逐图标注：
