@@ -63,10 +63,6 @@ export function apply(ctx, rowConfig = {}) {
   }
   const getConfig = () => deriveConfig(source())
 
-  console.log(
-    `[dsh-sight] loaded: ${getConfig().label} (model ${getConfig().model || '(unset)'}) — ${getConfig().ready ? 'backend ready' : 'NO api key, configure in Settings → dsh-sight or set ' + (getConfig().preset?.keyEnv || 'DSH_SIGHT_API_KEY')}`,
-  )
-
   if (entry.systemPrompt !== false) registerSystemPrompt(ctx, getConfig)
   registerVisionTool(ctx, getConfig, entry.toolName)
   installPromptAdmission(ctx, getConfig)
