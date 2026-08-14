@@ -93,5 +93,25 @@ delete process.env.DSH_SIGHT_PROVIDER
 setMaxImages(5)
 if (buildBaseConfig({ maxImages: 9 }).maxImages !== 9) throw new Error('row config maxImages failed')
 
+// 6. boot sweep: stale image dirs (mtime older than max age) are reclaimed,
+//    fresh ones and non-image* dirs are left alone
+const { ensureTmpDir } = await import('../lib/store.js')
+const { mkdirSync, utimesSync, existsSync, rmSync } = await import('node:fs')
+const { join } = await import('node:path')
+const stale = join(TMP_DIR, 'image999')
+mkdirSync(stale, { recursive: true })
+utimesSync(stale, new Date(Date.now() - 10 * 24 * 3600 * 1000), new Date(Date.now() - 10 * 24 * 3600 * 1000))
+const fresh = join(TMP_DIR, 'image998')
+mkdirSync(fresh, { recursive: true })
+const other = join(TMP_DIR, 'not-an-image-dir')
+mkdirSync(other, { recursive: true })
+ensureTmpDir()
+if (existsSync(stale)) throw new Error('stale image dir must be swept')
+if (!existsSync(fresh)) throw new Error('fresh image dir must survive the sweep')
+if (!existsSync(other)) throw new Error('non-image* dir must survive the sweep')
+rmSync(stale, { recursive: true, force: true })
+rmSync(fresh, { recursive: true, force: true })
+rmSync(other, { recursive: true, force: true })
+
 server.close()
 console.log('ALL ENGINE TESTS PASSED')
