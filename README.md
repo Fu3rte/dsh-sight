@@ -15,6 +15,20 @@ Plug-in vision for text-only [DeepSeek Harness (dsh)](https://deepseek.com/harne
 2. **`vision` tool** — the model calls it with the hint path (or any local path / http(s) URL); the plugin reads the bytes and answers through the configured OpenAI-compatible VLM backend.
 3. **System-prompt section** — teaches the model the hint → `vision` tool flow.
 4. **Web settings page** (Settings → Vision) — preset dropdown, API-key field, advanced overrides. Saved through the standard settings RPC and applied live, no restart (hot-reload via the `dsh-sight:` section of `$DSH_HOME/settings.yaml`).
+5. **Cache cleanup** — pasted images are stored under `/tmp/dsh-sight/image{N}/` with MD5 dedup and an LRU cap (`maxImages`, default 200). A boot-time sweep deletes `image*` dirs older than 7 days (`DSH_SIGHT_MAX_AGE_DAYS`), touching only the plugin's own directories; the OS clears `/tmp` on reboot too.
+6. **Security** — the API key is `role('secret')` and never rides a settings response. Local reads are capped at 25 MiB; URL fetches get a 30s timeout, a 25 MiB cap, and must claim an `image/*` content type. Remote bodies are downloaded and inlined — the vision API never receives your URLs (no SSRF surface). Only png/jpeg/webp/gif/bmp are accepted.
+
+## Demo
+
+<!-- Local demo screenshots live in assets/demo/ (demo1-4.png: the two pasted
+     awwwards screenshots, the chat hint workflow, the final description).
+     The files are gitignored; to publish them on GitHub, un-ignore them and
+     insert:
+
+     <p align="center">
+       <img src="assets/demo/demo4.png" width="600" alt="dsh-sight workflow" />
+     </p>
+-->
 
 ## Install
 
@@ -30,7 +44,13 @@ Or manually:
 dsh plugin --profile web add github:Fu3rte/dsh-sight
 ```
 
-(or `dsh plugin --profile web add dsh-sight` once published to npm)
+Or clone it yourself:
+
+```sh
+git clone https://github.com/Fu3rte/dsh-sight.git
+cd dsh-sight && pnpm install
+dsh plugin --profile web add ./
+```
 
 ## Configure
 
@@ -69,19 +89,9 @@ The `vision` tool's `paths` array takes up to 10 images per call (local paths or
 <description>
 ```
 
-## Development
-
-```sh
-pnpm install                 # plugin-local deps (schemastery, dsh-settings)
-node test/engine-smoke.mjs   # engine: batch, keyless, extension guard
-node test/plugin-apply.mjs   # registrations: tool, admission override, settings wiring
-dsh plugin --profile test add ./   # local install
-dsh --profile test --dump-config   # verify the layer
-```
-
 ## Acknowledgements
 
-Inspired by the vision-helper pattern from [opencode](https://github.com/anomalyco/opencode), [modlens](https://github.com/liustack/modlens), and [dsh-eyes](https://github.com/JY626/dsh-eyes).
+Inspired by [modlens](https://github.com/liustack/modlens) and [dsh-eyes](https://github.com/JY626/dsh-eyes).
 
 DeepSeek Harness: [official site](https://deepseek.com/harness) · [GitHub](https://github.com/deepseek-ai/deepseek-harness)
 

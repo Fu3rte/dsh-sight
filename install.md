@@ -29,6 +29,14 @@ Install the dsh-sight plugin so a text-only DeepSeek Harness (dsh) model can see
 dsh plugin --profile web add github:Fu3rte/dsh-sight
 ```
 
+Alternative (from a clone):
+
+```bash
+git clone https://github.com/Fu3rte/dsh-sight.git
+cd dsh-sight && pnpm install
+dsh plugin --profile web add ./
+```
+
 Verify the plugin is registered:
 
 ```bash

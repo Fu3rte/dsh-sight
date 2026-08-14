@@ -15,6 +15,19 @@
 2. **`vision` 工具** — 模型拿着提示路径（或任意本地路径 / http(s) URL）调用它；插件读取字节并通过配置好的 OpenAI 兼容 VLM 后端作答。
 3. **系统提示词分节** — 教会模型"提示 → `vision` 工具"的流程。
 4. **网页设置页**（Settings → 视觉模型）— 预设下拉、API key 输入框、高级覆盖项。走标准 settings RPC 保存，即时生效、无需重启（通过 `$DSH_HOME/settings.yaml` 的 `dsh-sight:` 分节热加载）。
+5. **缓存清理** — 粘贴图片存放于 `/tmp/dsh-sight/image{N}/`，MD5 去重，LRU 上限（`maxImages`，默认 200）。启动时清扫超过 7 天的 `image*` 目录（`DSH_SIGHT_MAX_AGE_DAYS`），只动插件自己的目录；系统重启也会清空 `/tmp`。
+6. **安全设置** — API key 是 `role('secret')`，绝不随 settings 响应返回。本地读取上限 25 MiB；URL 抓取限 30s 超时、25 MiB 上限、且必须声明 `image/*` 类型。远程内容先下载再内联——vision API 永远收不到你的 URL（无 SSRF 面）。只接受 png/jpeg/webp/gif/bmp。
+
+## 演示
+
+<!-- 本地演示截图在 assets/demo/（demo1-4.png：两张 awwwards 截图输入、
+     聊天提示工作流、最终描述）。文件已 gitignore；要发布到 GitHub 需先
+     取消 ignore，再插入：
+
+     <p align="center">
+       <img src="assets/demo/demo4.png" width="600" alt="dsh-sight 工作流" />
+     </p>
+-->
 
 ## 安装
 
@@ -30,7 +43,13 @@
 dsh plugin --profile web add github:Fu3rte/dsh-sight
 ```
 
-（发布到 npm 后可用 `dsh plugin --profile web add dsh-sight`）
+也可以直接 clone 下来：
+
+```sh
+git clone https://github.com/Fu3rte/dsh-sight.git
+cd dsh-sight && pnpm install
+dsh plugin --profile web add ./
+```
 
 ## 配置
 
@@ -69,19 +88,9 @@ API key 是 `role('secret')`：绝不随 settings 响应返回；UI 渲染为只
 <描述>
 ```
 
-## 开发
-
-```sh
-pnpm install                 # 插件本地依赖（schemastery、dsh-settings）
-node test/engine-smoke.mjs   # 引擎：批量、免 key、扩展名守卫
-node test/plugin-apply.mjs   # 注册：工具、准入覆写、settings 接线
-dsh plugin --profile test add ./   # 本地安装
-dsh --profile test --dump-config   # 验证配置层
-```
-
 ## 致谢
 
-设计借鉴自 [opencode](https://github.com/anomalyco/opencode) 的 vision-helper 模式、[modlens](https://github.com/liustack/modlens) 和 [dsh-eyes](https://github.com/JY626/dsh-eyes)。
+设计借鉴自 [modlens](https://github.com/liustack/modlens) 和 [dsh-eyes](https://github.com/JY626/dsh-eyes)。
 
 DeepSeek Harness：[官方网站](https://deepseek.com/harness) · [GitHub](https://github.com/deepseek-ai/deepseek-harness)
 
