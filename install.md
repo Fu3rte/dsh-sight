@@ -15,6 +15,14 @@ Install the dsh-sight plugin so a text-only DeepSeek Harness (dsh) model can see
 
 ## Step 1: Install
 
+Preferred (npm registry — fast, works behind China mirrors):
+
+```bash
+dsh plugin --profile web add dsh-sight
+```
+
+Alternative (from GitHub — may be slow on unstable networks):
+
 ```bash
 dsh plugin --profile web add github:Fu3rte/dsh-sight
 ```
@@ -25,6 +33,12 @@ Alternative (from a clone):
 git clone https://github.com/Fu3rte/dsh-sight.git
 cd dsh-sight && pnpm install
 dsh plugin --profile web add ./
+```
+
+If the npm install is still slow, point pnpm at a China mirror first:
+
+```bash
+pnpm config set registry https://registry.npmmirror.com
 ```
 
 Verify the plugin is registered:
@@ -68,7 +82,7 @@ Have the user paste an image and confirm a text description comes back. If the t
 
 | Item | Value |
 |---|---|
-| Plugin | `github:Fu3rte/dsh-sight` |
+| Plugin | `dsh-sight` (npm) · `github:Fu3rte/dsh-sight` |
 | Tool name | `vision` |
 | Image store | `/tmp/dsh-sight/image{N}/{hash}.{ext}` |
 | Settings section | `dsh-sight:` in `settings.yaml` |

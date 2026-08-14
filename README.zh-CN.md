@@ -21,16 +21,16 @@
 ## 效果演示
 
 <p align="center">
-  <img src="assets/demo/demo1.png" width="300" alt="粘贴截图 1" />
-  <img src="assets/demo/demo2.png" width="300" alt="粘贴截图 2" />
+  <img src="https://raw.githubusercontent.com/Fu3rte/dsh-sight/master/assets/demo/demo1.png" width="300" alt="粘贴截图 1" />
+  <img src="https://raw.githubusercontent.com/Fu3rte/dsh-sight/master/assets/demo/demo2.png" width="300" alt="粘贴截图 2" />
 </p>
 
 <p align="center">
-  <img src="assets/demo/demo.png" width="640" alt="dsh-sight 工作流" />
+  <img src="https://raw.githubusercontent.com/Fu3rte/dsh-sight/master/assets/demo/demo.png" width="640" alt="dsh-sight 工作流" />
 </p>
 
 <p align="center">
-  <img src="assets/demo/result.png" width="640" alt="模型描述输出" />
+  <img src="https://raw.githubusercontent.com/Fu3rte/dsh-sight/master/assets/demo/result.png" width="640" alt="模型描述输出" />
 </p>
 
 `vision` 工具的 `paths` 数组每次最多 10 张（本地路径或 URL，单张上限 25 MiB）。一次请求，逐图标注：
@@ -50,7 +50,13 @@
 帮我安装 dsh-sight：https://raw.githubusercontent.com/Fu3rte/dsh-sight/master/install.md
 ```
 
-或者手动安装：
+或者手动安装（npm registry，推荐）：
+
+```sh
+dsh plugin --profile web add dsh-sight
+```
+
+或者从 GitHub：
 
 ```sh
 dsh plugin --profile web add github:Fu3rte/dsh-sight
@@ -63,6 +69,8 @@ git clone https://github.com/Fu3rte/dsh-sight.git
 cd dsh-sight && pnpm install
 dsh plugin --profile web add ./
 ```
+
+> GitHub 下载慢或不稳定（如中国大陆网络）？用上面的 npm 安装即可。再把 pnpm 指到国内镜像，整个安装（包本体 + 依赖）都不走 GitHub：`pnpm config set registry https://registry.npmmirror.com`
 
 ## 配置
 

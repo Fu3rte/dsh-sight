@@ -21,17 +21,17 @@ Plug-in vision for text-only [DeepSeek Harness (dsh)](https://deepseek.com/harne
 ## Demo
 
 <p align="center">
-  <img src="assets/demo/demo1.png" width="300" alt="pasted screenshot 1" />
-  <img src="assets/demo/demo2.png" width="300" alt="pasted screenshot 2" />
+  <img src="https://raw.githubusercontent.com/Fu3rte/dsh-sight/master/assets/demo/demo1.png" width="300" alt="pasted screenshot 1" />
+  <img src="https://raw.githubusercontent.com/Fu3rte/dsh-sight/master/assets/demo/demo2.png" width="300" alt="pasted screenshot 2" />
 </p>
 
 <p align="center">
-  <img src="assets/demo/demo.png" width="640" alt="dsh-sight workflow" />
+  <img src="https://raw.githubusercontent.com/Fu3rte/dsh-sight/master/assets/demo/demo.png" width="640" alt="dsh-sight workflow" />
 </p>
 
 
 <p align="center">
-  <img src="assets/demo/result.png" width="640" alt="model description" />
+  <img src="https://raw.githubusercontent.com/Fu3rte/dsh-sight/master/assets/demo/result.png" width="640" alt="model description" />
 </p>
 
 The `vision` tool's `paths` array takes up to 10 images per call (local paths or URLs, 25 MiB each). One request, per-image labels:
@@ -51,7 +51,13 @@ The `vision` tool's `paths` array takes up to 10 images per call (local paths or
 Install dsh-sight for me: https://raw.githubusercontent.com/Fu3rte/dsh-sight/master/install.md
 ```
 
-Or manually:
+Or manually (npm registry, recommended):
+
+```sh
+dsh plugin --profile web add dsh-sight
+```
+
+Or from GitHub:
 
 ```sh
 dsh plugin --profile web add github:Fu3rte/dsh-sight
@@ -64,6 +70,8 @@ git clone https://github.com/Fu3rte/dsh-sight.git
 cd dsh-sight && pnpm install
 dsh plugin --profile web add ./
 ```
+
+> GitHub downloads slow or unstable (e.g. mainland China)? Use the npm-registry install above. Point pnpm at a mirror and the whole install — package and dependencies — stays off GitHub: `pnpm config set registry https://registry.npmmirror.com`
 
 ## Configure
 
