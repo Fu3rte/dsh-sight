@@ -20,20 +20,18 @@ Plug-in vision for text-only [DeepSeek Harness (dsh)](https://deepseek.com/harne
 
 ## Demo
 
-Two awwwards screenshots pasted at once, described in a single batched request:
-
 <p align="center">
   <img src="assets/demo/demo1.png" width="300" alt="pasted screenshot 1" />
   <img src="assets/demo/demo2.png" width="300" alt="pasted screenshot 2" />
 </p>
 
 <p align="center">
-  <img src="assets/demo/demo4.png" width="640" alt="dsh-sight workflow" />
+  <img src="assets/demo/demo.png" width="640" alt="dsh-sight workflow" />
 </p>
 
 
 <p align="center">
-  <img src="assets/demo/demo3.png" width="640" alt="model description" />
+  <img src="assets/demo/result.png" width="640" alt="model description" />
 </p>
 
 The `vision` tool's `paths` array takes up to 10 images per call (local paths or URLs, 25 MiB each). One request, per-image labels:
