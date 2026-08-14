@@ -1,5 +1,5 @@
 {
-  "name": "dsh-vision-helper",
+  "name": "dsh-sight",
   "version": "0.1.0",
   "description": "Plug-in vision for text-only DeepSeek Harness (dsh) models: a `vision` tool with built-in cheap/free VLM presets, multi-image batch analysis, and paste-to-hint image admission.",
   "type": "module",
@@ -27,7 +27,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/fu3rte/dsh-vision-helper.git"
+    "url": "git+https://github.com/fu3rte/dsh-sight.git"
   },
   "dsh": {
     "bundle": {

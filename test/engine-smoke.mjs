@@ -66,12 +66,12 @@ if (lastRequest.model !== 'test-model' || lastRequest.max_tokens !== 4096) {
 }
 
 // 2. preset default + env override
-process.env.DSH_VISION_PROVIDER = 'glm-4v-flash'
+process.env.DSH_SIGHT_PROVIDER = 'glm-4v-flash'
 const presetConfig = resolveConfig({})
 if (presetConfig.baseUrl !== 'https://open.bigmodel.cn/api/paas/v4' || presetConfig.model !== 'glm-4v-flash' || presetConfig.apiType !== 'openai') {
   throw new Error('preset resolution failed: ' + JSON.stringify(presetConfig))
 }
-delete process.env.DSH_VISION_PROVIDER
+delete process.env.DSH_SIGHT_PROVIDER
 
 // 3. error path: missing file degrades to text, no throw
 const badResult = await analyzeImages(config, ['/nonexistent/x.png'], undefined)

@@ -1,4 +1,4 @@
-# dsh bundle layer: mount the dsh-vision-helper plugin.
+# dsh bundle layer: mount the dsh-sight plugin.
 - insert:
-    - id: dsh-vision-helper
-      name: dsh-vision-helper
+    - id: dsh-sight
+      name: dsh-sight

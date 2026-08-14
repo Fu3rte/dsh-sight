@@ -1,4 +1,4 @@
-# dsh-vision-helper
+# dsh-sight
 
 Plug-in vision for text-only [DeepSeek Harness (dsh)](https://github.com/deepseek-ai/deepseek-harness) models. A dsh port of the opencode `vision-helper` pattern, with two upgrades:
 
@@ -8,7 +8,7 @@ Plug-in vision for text-only [DeepSeek Harness (dsh)](https://github.com/deepsee
 ## How it works
 
 1. **`vision` tool** — the model calls it with local file paths or http(s) URLs; the plugin reads the bytes and answers through the configured VLM backend (OpenAI-compatible or MiniMax native).
-2. **Vision provider wrapper** (`deepseek-vision`) — dsh's DeepSeek adapter refuses image pastes at intake (text-only). This plugin registers a wrapped model variant that admits images, saves each paste to `/tmp/dsh-vision/image{N}/{hash}.png`, and replaces the image block with a path hint before delegating back upstream. The durable log keeps the real image; only the wire message changes.
+2. **Vision provider wrapper** (`deepseek-vision`) — dsh's DeepSeek adapter refuses image pastes at intake (text-only). This plugin registers a wrapped model variant that admits images, saves each paste to `/tmp/dsh-sight/image{N}/{hash}.png`, and replaces the image block with a path hint before delegating back upstream. The durable log keeps the real image; only the wire message changes.
 3. **System-prompt section** — teaches the model the hint → `vision` tool flow.
 
 No build step, no runtime dependencies (plain ESM + Node builtins), so `dsh plugin add github:…` works without pnpm build permissions.
@@ -16,10 +16,10 @@ No build step, no runtime dependencies (plain ESM + Node builtins), so `dsh plug
 ## Install
 
 ```sh
-dsh plugin --profile web add github:fu3rte/dsh-vision-helper
+dsh plugin --profile web add github:fu3rte/dsh-sight
 ```
 
-(or publish to npm and `dsh plugin --profile web add dsh-vision-helper`)
+(or publish to npm and `dsh plugin --profile web add dsh-sight`)
 
 ## Configure a preset
 
@@ -33,7 +33,7 @@ Minimal setup: pick a preset id and export its key.
 | `mimo-v2.5` | MiniMax (native VLM endpoint) | `MINIMAX_API_KEY` | ¥1/¥2 per M tokens |
 | `gpt-4o-mini` | OpenAI | `OPENAI_API_KEY` | $0.15/$0.60 |
 | `opencode-zen-go` | OpenCode Zen Go ($10/mo) | `ZEN_API_KEY` | mimo-v2.5, minimax-m3, gpt-5.6-luna… |
-| `custom` | any OpenAI-compatible endpoint | `DSH_VISION_API_KEY` | — |
+| `custom` | any OpenAI-compatible endpoint | `DSH_SIGHT_API_KEY` | — |
 
 ```sh
 export ZHIPU_API_KEY=sk-xxxx   # example: GLM-4V-Flash
@@ -43,7 +43,7 @@ Then use dsh normally. Pasting an image, or pointing the model at a file, routes
 
 ### Config file
 
-`~/.config/dsh-vision-helper/config.json` (keep it `chmod 600`):
+`~/.config/dsh-sight/config.json` (keep it `chmod 600`):
 
 ```json
 {
@@ -66,20 +66,20 @@ Priority: **env > config file > plugin row config > preset defaults**. The file 
 
 | Var | Meaning |
 |---|---|
-| `DSH_VISION_PROVIDER` | preset id or `custom` |
-| `DSH_VISION_API_KEY` | explicit key (beats the preset's own env) |
-| `DSH_VISION_MODEL` / `DSH_VISION_BASE_URL` / `DSH_VISION_API_TYPE` | overrides (`openai` \| `minimax`) |
-| `DSH_VISION_TIMEOUT_MS` / `DSH_VISION_MAX_TOKENS` | engine tuning |
-| `DSH_VISION_MAX_IMAGES` | LRU cap of stored pastes (default 200) |
-| `DSH_VISION_CONFIG` | config file path override |
+| `DSH_SIGHT_PROVIDER` | preset id or `custom` |
+| `DSH_SIGHT_API_KEY` | explicit key (beats the preset's own env) |
+| `DSH_SIGHT_MODEL` / `DSH_SIGHT_BASE_URL` / `DSH_SIGHT_API_TYPE` | overrides (`openai` \| `minimax`) |
+| `DSH_SIGHT_TIMEOUT_MS` / `DSH_SIGHT_MAX_TOKENS` | engine tuning |
+| `DSH_SIGHT_MAX_IMAGES` | LRU cap of stored pastes (default 200) |
+| `DSH_SIGHT_CONFIG` | config file path override |
 
 ### Plugin row config
 
 In your profile's `cordis.patch.yml` you can also set defaults:
 
 ```yaml
-- id: dsh-vision-helper
-  name: dsh-vision-helper
+- id: dsh-sight
+  name: dsh-sight
   config:
     provider: glm-4v-flash
     toolName: vision
@@ -101,9 +101,9 @@ The `vision` tool's `paths` array takes up to 10 images per call (local paths or
 
 ## Comparison with modlens
 
-[dsh-vision-helper](https://github.com/fu3rte/dsh-vision-helper) is the modlens-for-dsh alternative with a smaller footprint (no CLI, no electron spawn, no separate engine install):
+[dsh-sight](https://github.com/fu3rte/dsh-sight) is the modlens-for-dsh alternative with a smaller footprint (no CLI, no electron spawn, no separate engine install):
 
-| | modlens | dsh-vision-helper |
+| | modlens | dsh-sight |
 |---|---|---|
 | Engine | bundled CLI (own release cadence) | inline in the plugin |
 | Output | structured 5-part evidence schema | plain descriptions (+ batch labels) |

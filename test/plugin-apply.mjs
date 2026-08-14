@@ -47,7 +47,7 @@ if (providers[0] !== 'deepseek-vision') throw new Error('adapter route wrong')
 // 4. listModels wraps + renames + declares image input
 const models = await adapter.listModels('deepseek-vision')
 if (models[0].inputModalities?.join(',') !== 'text,image') throw new Error('inputModalities not set')
-if (!models[0].name.includes('vision helper')) throw new Error('model not renamed')
+if (!models[0].name.includes('dsh-sight')) throw new Error('model not renamed')
 
 // 5. stream() converts pasted image blocks to hints, delegates upstream
 const messages = [
