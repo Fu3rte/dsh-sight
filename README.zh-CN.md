@@ -18,8 +18,16 @@
 
 ## 安装
 
+**交给你的 AI Agent**（推荐）——把这句话复制给你的 Agent：
+
+```
+帮我安装 dsh-sight：https://raw.githubusercontent.com/Fu3rte/dsh-sight/master/install.md
+```
+
+或者手动安装：
+
 ```sh
-dsh plugin --profile web add github:fu3rte/dsh-sight
+dsh plugin --profile web add github:Fu3rte/dsh-sight
 ```
 
 （发布到 npm 后可用 `dsh plugin --profile web add dsh-sight`）

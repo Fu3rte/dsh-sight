@@ -1,23 +1,57 @@
-# Install dsh-sight (for agents)
+# dsh-sight — Installation Guide
 
-Add plug-in vision to a text-only DeepSeek Harness (dsh) model. One command, no restart.
+## For Humans
 
-## Install
+Copy this to your AI Agent:
 
-```sh
-dsh plugin --profile web add github:fu3rte/dsh-sight
+```
+帮我安装 dsh-sight：https://raw.githubusercontent.com/Fu3rte/dsh-sight/master/install.md
 ```
 
-## Configure
+(English: "Install dsh-sight for me: https://raw.githubusercontent.com/Fu3rte/dsh-sight/master/install.md")
 
-Ask the user to open the dsh web UI → **Settings → Vision (视觉模型)**:
+## For AI Agents
+
+### Goal
+
+Install the dsh-sight plugin so a text-only DeepSeek Harness (dsh) model can see pasted images via a VLM backend. After installation, images pasted into the chat are auto-saved and replaced with path hints, and the model describes them through the `vision` tool.
+
+### Boundaries
+
+- DO NOT run commands with `sudo` unless the user explicitly approves.
+- DO NOT edit the user's `settings.yaml` or any file outside the dsh profile without asking.
+- DO NOT invent API keys or sign the user up for services; if a key is missing, ask the user.
+- If anything needs user input (keys, credentials), ask and let them decide.
+
+### Step 1: Install
+
+```bash
+dsh plugin --profile web add github:Fu3rte/dsh-sight
+```
+
+Verify the plugin is registered:
+
+```bash
+dsh --profile web --dump-config | grep -i dsh-sight
+```
+
+### Step 2: Configure
+
+Open the dsh web UI (Settings → Vision / 视觉模型) — or guide the user through it:
 
 1. Pick a preset: `opencode-zen` (free, keyless) or `gemini-flash` (needs `GEMINI_API_KEY`).
 2. Paste the API key if required, hit **Save**. Applies live — no restart.
 
-Headless alternative: set `DSH_SIGHT_PROVIDER` / `DSH_SIGHT_API_KEY` etc. in `settings.yaml` under the `dsh-sight:` section.
+Headless (no GUI): add to `$DSH_HOME/settings.yaml`:
 
-## How the user uses it
+```yaml
+dsh-sight:
+  provider: opencode-zen   # or gemini-flash + apiKey
+```
+
+Config layers (highest wins): settings.yaml `dsh-sight:` > `DSH_SIGHT_*` env > `~/.config/dsh-sight/config.json` > plugin row config > preset defaults.
+
+### Step 3: How the user uses it
 
 - The user pastes an image; the plugin stores it and replaces it with a hint such as `[Image #1 auto-saved to /tmp/dsh-sight/image1/xxxx.png]`.
 - Call the `vision` tool with that path (or any local path / http(s) URL), optionally with a `question`:
@@ -26,10 +60,19 @@ Headless alternative: set `DSH_SIGHT_PROVIDER` / `DSH_SIGHT_API_KEY` etc. in `se
 { "paths": ["/tmp/dsh-sight/image1/xxxx.png"], "question": "What does this chart show?" }
 ```
 
-- Multi-image batch: pass up to 10 paths in one call (25 MiB each).
+- Multi-image batch: up to 10 paths per call, 25 MiB each.
 
-## Verify
+### Step 4: Verify
 
 Have the user paste an image and confirm a text description comes back. If the tool errors with "No vision backend configured", the preset / model / baseUrl / API key is missing — check Settings → Vision.
 
-Docs: [README.md](README.md) · dsh: https://deepseek.com/harness
+### Quick Reference
+
+| Item | Value |
+|---|---|
+| Plugin | `github:Fu3rte/dsh-sight` |
+| Tool name | `vision` |
+| Image store | `/tmp/dsh-sight/image{N}/{hash}.{ext}` |
+| Settings section | `dsh-sight:` in `settings.yaml` |
+| Env prefix | `DSH_SIGHT_*` |
+| Docs | [README.md](README.md) · dsh: https://deepseek.com/harness |

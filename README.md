@@ -18,8 +18,16 @@ Plug-in vision for text-only [DeepSeek Harness (dsh)](https://deepseek.com/harne
 
 ## Install
 
+**Via your AI agent** (recommended) — copy this to your agent:
+
+```
+Install dsh-sight for me: https://raw.githubusercontent.com/Fu3rte/dsh-sight/master/install.md
+```
+
+Or manually:
+
 ```sh
-dsh plugin --profile web add github:fu3rte/dsh-sight
+dsh plugin --profile web add github:Fu3rte/dsh-sight
 ```
 
 (or `dsh plugin --profile web add dsh-sight` once published to npm)
