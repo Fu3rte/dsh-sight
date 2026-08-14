@@ -2,10 +2,8 @@
 //  1. multi-image batch → single request with N image_url parts
 //  2. auth header + model + max_tokens forwarded
 //  3. keyless preset → no Authorization header, ready=true without key
-//  
-//  5. unsupported extension (heic) → clear per-image error, no mislabel
-//  6. config derivation (preset defaults, keyless ready)
-//  7. store dedup + LRU basics + TMP_DIR naming
+//  4. unsupported extension (heic) → clear per-image error, no mislabel
+//  5. env override beats preset default
 import http from 'node:http'
 import { analyzeImages } from '../lib/engine.js'
 import { buildBaseConfig, deriveConfig } from '../lib/config.js'

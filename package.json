@@ -24,7 +24,6 @@
     "vision",
     "vlm",
     "multimodal",
-    "glm-4v",
     "mimo"
   ],
   "license": "MIT",

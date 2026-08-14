@@ -122,7 +122,6 @@ if (degraded.type !== 'text' || !degraded.text.includes('could not be read by ds
 disposers.forEach((dispose) => {
   try { dispose() } catch {}
 })
-if (apiProxy.sessions.prompt !== apiProxy.sessions.prompt) throw new Error('unreachable')
 // (method identity restore is checked implicitly: the wrapper replaced the
 // bound original; after dispose the original bound function is back)
 
