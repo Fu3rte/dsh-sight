@@ -18,16 +18,31 @@
 5. **缓存清理** — 粘贴图片存放于 `/tmp/dsh-sight/image{N}/`，MD5 去重，LRU 上限（`maxImages`，默认 200）。启动时清扫超过 7 天的 `image*` 目录（`DSH_SIGHT_MAX_AGE_DAYS`），只动插件自己的目录；系统重启也会清空 `/tmp`。
 6. **安全设置** — API key 是 `role('secret')`，绝不随 settings 响应返回。本地读取上限 25 MiB；URL 抓取限 30s 超时、25 MiB 上限、且必须声明 `image/*` 类型。远程内容先下载再内联——vision API 永远收不到你的 URL（无 SSRF 面）。只接受 png/jpeg/webp/gif/bmp。
 
-## 演示
+## 效果演示
 
-<!-- 本地演示截图在 assets/demo/（demo1-4.png：两张 awwwards 截图输入、
-     聊天提示工作流、最终描述）。文件已 gitignore；要发布到 GitHub 需先
-     取消 ignore，再插入：
+一次性粘贴两张 awwwards 截图，单次批量请求完成描述：
 
-     <p align="center">
-       <img src="assets/demo/demo4.png" width="600" alt="dsh-sight 工作流" />
-     </p>
--->
+<p align="center">
+  <img src="assets/demo/demo4.png" width="640" alt="dsh-sight 工作流" />
+</p>
+
+<p align="center">
+  <img src="assets/demo/demo1.png" width="300" alt="粘贴截图 1" />
+  <img src="assets/demo/demo2.png" width="300" alt="粘贴截图 2" />
+</p>
+
+<p align="center">
+  <img src="assets/demo/demo3.png" width="640" alt="模型描述输出" />
+</p>
+
+`vision` 工具的 `paths` 数组每次最多 10 张（本地路径或 URL，单张上限 25 MiB）。一次请求，逐图标注：
+
+```
+--- Image 1 ---
+<描述>
+--- Image 2 ---
+<描述>
+```
 
 ## 安装
 
@@ -76,17 +91,6 @@ dsh plugin --profile web add ./
 5. 预设默认值
 
 API key 是 `role('secret')`：绝不随 settings 响应返回；UI 渲染为只写输入框，仅提示是否已保存。
-
-## 多图批量
-
-`vision` 工具的 `paths` 数组每次最多 10 张（本地路径或 URL，单张上限 25 MiB）。一次请求，逐图标注：
-
-```
---- Image 1 ---
-<描述>
---- Image 2 ---
-<描述>
-```
 
 ## 致谢
 
