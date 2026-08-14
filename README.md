@@ -31,13 +31,16 @@ Open dsh web → **Settings → 视觉模型**:
 
 | Preset | Provider | Key env | Price |
 |---|---|---|---|
+| `opencode-zen` | OpenCode Zen | _(keyless)_ | free tier |
+| `ollama` | local Ollama (`ollama run qwen2.5vl:7b`) | _(keyless)_ | free, local |
 | `glm-4v-flash` | Zhipu BigModel | `ZHIPU_API_KEY` | free |
 | `gemini-flash` | Google AI Studio (OpenAI-compat) | `GEMINI_API_KEY` | free tier |
-| `opencode-zen` | OpenCode Zen | _(keyless)_ | free tier |
 | `mimo-v2.5` | MiniMax (native VLM endpoint) | `MINIMAX_API_KEY` | ¥1/¥2 per M tokens |
 | `gpt-4o-mini` | OpenAI | `OPENAI_API_KEY` | $0.15/$0.60 |
 | `opencode-zen-go` | OpenCode Zen Go ($10/mo) | `ZEN_API_KEY` | mimo-v2.5, minimax-m3, gpt-5.6-luna… |
 | `custom` | any OpenAI-compatible endpoint | `DSH_SIGHT_API_KEY` | — |
+
+The keyless presets need nothing but the save button. The rest are free-tier/low-cost hosted models: the preset saves you from finding the right baseUrl + model id + API dialect — the signup key is the provider's account system, not something a preset can bypass.
 
 ### Headless / no-GUI fallback
 
