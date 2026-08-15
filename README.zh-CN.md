@@ -6,7 +6,7 @@
 
 ## 特性
 
-- **内置 VLM 预设** — OpenCode Zen（免费、免 key）和 Gemini Flash（免费额度）。在网页设置页选一个即可。
+- **内置 VLM 预设** — OpenCode Zen（免费、免 key）和 Gemini Flash（免费额度），另有自定义模式可接任意 OpenAI 兼容端点。在网页设置页选一个即可。
 - **多图批量分析** — `vision` 工具一次调用最多接受 10 个路径/URL，单次请求完成全部描述，按图标注。
 
 ## 工作原理
@@ -14,7 +14,7 @@
 1. **提示准入覆写** — dsh 会拒绝纯文本模型接收粘贴图片。dsh-sight 包装 `apiProxy.sessions.prompt`：接受粘贴，图片字节落地到 `/tmp/dsh-sight/image{N}/{hash}.png`，图片块在进入历史前变成路径提示。任何 provider 都可用——无需切换模型变体。
 2. **`vision` 工具** — 模型拿着提示路径（或任意本地路径 / http(s) URL）调用它；插件读取字节并通过配置好的 OpenAI 兼容 VLM 后端作答。
 3. **系统提示词分节** — 教会模型"提示 → `vision` 工具"的流程。
-4. **网页设置页**（Settings → 视觉模型）— 预设下拉、API key 输入框、高级覆盖项。走标准 settings RPC 保存，即时生效、无需重启（通过 `$DSH_HOME/settings.yaml` 的 `dsh-sight:` 分节热加载）。
+4. **网页设置页**（Settings → 视觉模型）— 后端来源（预设或自定义端点）、生效配置预览（显示实际请求目标）、API key 输入框、高级参数。走标准 settings RPC 保存，即时生效、无需重启（通过 `$DSH_HOME/settings.yaml` 的 `dsh-sight:` 分节热加载）。
 5. **缓存清理** — 粘贴图片存放于 `/tmp/dsh-sight/image{N}/`，MD5 去重，LRU 上限（`maxImages`，默认 200）。启动时清扫超过 7 天的 `image*` 目录（`DSH_SIGHT_MAX_AGE_DAYS`），只动插件自己的目录；系统重启也会清空 `/tmp`。
 6. **安全设置** — API key 是 `role('secret')`，绝不随 settings 响应返回。本地读取上限 25 MiB；URL 抓取限 30s 超时、25 MiB 上限、且必须声明 `image/*` 类型。远程内容先下载再内联——vision API 永远收不到你的 URL（无 SSRF 面）。只接受 png/jpeg/webp/gif/bmp。
 
@@ -76,15 +76,19 @@ dsh plugin --profile web add ./
 
 打开 dsh 网页 → **Settings → 视觉模型**：
 
-1. 选择一个预设（model / base URL 自动填充）。
-2. 需要 key 时粘贴 API key，点保存——立即生效。
+1. 选择后端来源：
+   - 预设（`opencode-zen` / `gemini-flash`）——model / base URL 自动填充；或
+   - **自定义端点**——自行填写模型名、Base URL（OpenAI 兼容）和 API key。
+2. 查看**生效配置**卡片——它显示 vision 工具实际使用的模型 / 端点 / key 状态。
+3. 需要 key 时粘贴 API key，点保存——立即生效。
 
 | 预设 | Provider | Key 环境变量 | 价格 |
 |---|---|---|---|
 | `opencode-zen` | OpenCode Zen | _（免 key）_ | 免费层 |
 | `gemini-flash` | Google AI Studio（OpenAI 兼容） | `GEMINI_API_KEY` | 免费额度 |
+| `custom` | 任意 OpenAI 兼容端点 | 自己的 key（或 `DSH_SIGHT_API_KEY`） | 你的端点 |
 
-免 key 预设点一下保存即可。任何其他 OpenAI 兼容端点也能用：在高级设置里填写 model / baseUrl。
+免 key 预设点一下保存即可。接任意其他 OpenAI 兼容端点（阿里云百炼 Qwen、OpenAI、本地模型等）时，选择**自定义端点**并填写模型名 / Base URL / API key。如果手动修改了预设的 model / Base URL，页面会提示"预设已被覆盖"，并可一键切换为**自定义端点**。
 
 ### 无 GUI / Headless 兜底
 

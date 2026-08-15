@@ -6,7 +6,7 @@ Plug-in vision for text-only [DeepSeek Harness (dsh)](https://deepseek.com/harne
 
 ## Features
 
-- **Built-in VLM presets** — OpenCode Zen (free, keyless) and Gemini Flash (free tier). Pick one in the web settings page, done.
+- **Built-in VLM presets** — OpenCode Zen (free, keyless) and Gemini Flash (free tier), plus a custom mode for any OpenAI-compatible endpoint. Pick one in the web settings page, done.
 - **Multi-image batch** — the `vision` tool takes up to 10 paths/URLs and describes all of them in ONE request, labeled per image.
 
 ## How it works
@@ -14,7 +14,7 @@ Plug-in vision for text-only [DeepSeek Harness (dsh)](https://deepseek.com/harne
 1. **Prompt-admission override** — dsh refuses image pastes for text-only models. dsh-sight wraps `apiProxy.sessions.prompt`: the paste is accepted, the bytes land in `/tmp/dsh-sight/image{N}/{hash}.png`, and the image block becomes a path hint before entering history. Works with any provider — no model variant to switch.
 2. **`vision` tool** — the model calls it with the hint path (or any local path / http(s) URL); the plugin reads the bytes and answers through the configured OpenAI-compatible VLM backend.
 3. **System-prompt section** — teaches the model the hint → `vision` tool flow.
-4. **Web settings page** (Settings → Vision) — preset dropdown, API-key field, advanced overrides. Saved through the standard settings RPC and applied live, no restart (hot-reload via the `dsh-sight:` section of `$DSH_HOME/settings.yaml`).
+4. **Web settings page** (Settings → Vision) — backend source (preset or custom endpoint), an effective-config preview showing the actual request target, API-key field, and advanced knobs. Saved through the standard settings RPC and applied live, no restart (hot-reload via the `dsh-sight:` section of `$DSH_HOME/settings.yaml`).
 5. **Cache cleanup** — pasted images are stored under `/tmp/dsh-sight/image{N}/` with MD5 dedup and an LRU cap (`maxImages`, default 200). A boot-time sweep deletes `image*` dirs older than 7 days (`DSH_SIGHT_MAX_AGE_DAYS`), touching only the plugin's own directories; the OS clears `/tmp` on reboot too.
 6. **Security** — the API key is `role('secret')` and never rides a settings response. Local reads are capped at 25 MiB; URL fetches get a 30s timeout, a 25 MiB cap, and must claim an `image/*` content type. Remote bodies are downloaded and inlined — the vision API never receives your URLs (no SSRF surface). Only png/jpeg/webp/gif/bmp are accepted.
 
@@ -77,15 +77,19 @@ dsh plugin --profile web add ./
 
 Open dsh web → **Settings → Vision**:
 
-1. Pick a preset (model / base URL fill themselves).
-2. Paste the API key if one is needed, hit Save — applied immediately.
+1. Pick a backend source:
+   - a preset (`opencode-zen` / `gemini-flash`) — model / base URL fill themselves; or
+   - **Custom endpoint** — fill in model, Base URL (OpenAI-compatible), and API key yourself.
+2. Check the **effective config** card — it shows the model / endpoint / key state the tool will actually use.
+3. Paste the API key if one is needed, hit Save — applied immediately.
 
 | Preset | Provider | Key env | Price |
 |---|---|---|---|
 | `opencode-zen` | OpenCode Zen | _(keyless)_ | free tier |
 | `gemini-flash` | Google AI Studio (OpenAI-compat) | `GEMINI_API_KEY` | free tier |
+| `custom` | Any OpenAI-compatible endpoint | your key (or `DSH_SIGHT_API_KEY`) | your endpoint |
 
-The keyless preset needs nothing but the save button. Any other OpenAI-compatible endpoint works too: set model / baseUrl in the advanced section.
+The keyless preset needs nothing but the save button. For any other OpenAI-compatible endpoint (Aliyun Bailian Qwen, OpenAI, local models, …), pick **Custom endpoint** and fill in model / Base URL / API key. If a preset's model or Base URL is edited by hand, the page warns that the preset is overridden and offers to switch the row to **Custom endpoint** with one click.
 
 ### Headless / no-GUI fallback
 
