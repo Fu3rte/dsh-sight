@@ -18,6 +18,18 @@ Plug-in vision for text-only [DeepSeek Harness (dsh)](https://deepseek.com/harne
 5. **Cache cleanup** — pasted images are stored under `/tmp/dsh-sight/image{N}/` with MD5 dedup and an LRU cap (`maxImages`, default 200). A boot-time sweep deletes `image*` dirs older than 7 days (`DSH_SIGHT_MAX_AGE_DAYS`), touching only the plugin's own directories; the OS clears `/tmp` on reboot too.
 6. **Security** — the API key is `role('secret')` and never rides a settings response. Local reads are capped at 25 MiB; URL fetches get a 30s timeout, a 25 MiB cap, and must claim an `image/*` content type. Remote bodies are downloaded and inlined — the vision API never receives your URLs (no SSRF surface). Only png/jpeg/webp/gif/bmp are accepted.
 
+## How to use
+
+1. **Install & configure** — `dsh plugin --profile web add dsh-sight`, then open Settings → Vision, pick a preset (or a custom endpoint) and hit Save.
+2. **Paste an image** — it is auto-saved under a plugin store directory and the image block becomes a hint carrying the exact path, e.g. `[Image #1 auto-saved to /tmp/dsh-sight/image1/xxxx.png]`. The store root is OS-dependent (`/tmp` on Linux, `/var/folders/…` on macOS, `%TEMP%` on Windows), but the hint always shows the real full path.
+3. **Or call `vision` directly** — the `paths` array takes the hint path above, or any local path / http(s) URL, optionally with a `question`:
+
+```json
+{ "paths": ["/tmp/dsh-sight/image1/xxxx.png"], "question": "What does this chart show?" }
+```
+
+4. **Batch** — up to 10 images per call, described in one request.
+
 ## Demo
 
 <p align="center">

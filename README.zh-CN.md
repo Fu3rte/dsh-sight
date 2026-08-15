@@ -18,6 +18,18 @@
 5. **缓存清理** — 粘贴图片存放于 `/tmp/dsh-sight/image{N}/`，MD5 去重，LRU 上限（`maxImages`，默认 200）。启动时清扫超过 7 天的 `image*` 目录（`DSH_SIGHT_MAX_AGE_DAYS`），只动插件自己的目录；系统重启也会清空 `/tmp`。
 6. **安全设置** — API key 是 `role('secret')`，绝不随 settings 响应返回。本地读取上限 25 MiB；URL 抓取限 30s 超时、25 MiB 上限、且必须声明 `image/*` 类型。远程内容先下载再内联——vision API 永远收不到你的 URL（无 SSRF 面）。只接受 png/jpeg/webp/gif/bmp。
 
+## 使用方法
+
+1. **安装并配置** — `dsh plugin --profile web add dsh-sight`，打开 Settings → 视觉模型，选一个预设（或自定义端点）保存即可。
+2. **粘贴图片** — 图片自动保存到插件存储目录，聊天里的图片块会变成携带完整路径的提示，如 `[Image #1 auto-saved to /tmp/dsh-sight/image1/xxxx.png]`。存储根目录因系统而异（Linux 是 `/tmp`，macOS 是 `/var/folders/…`，Windows 是 `%TEMP%`），但提示文本里总是真实完整路径。
+3. **或直接调用 `vision`** — `paths` 数组填上一步提示里的路径（或任意本地路径 / http(s) URL），可附带 `question`：
+
+```json
+{ "paths": ["/tmp/dsh-sight/image1/xxxx.png"], "question": "这个图表讲的是什么？" }
+```
+
+4. **批量分析** — 一次最多 10 张图，单次请求完成全部描述。
+
 ## 效果演示
 
 <p align="center">
