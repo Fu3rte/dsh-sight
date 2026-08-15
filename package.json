@@ -1,6 +1,6 @@
 {
   "name": "dsh-sight",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Plug-in vision for text-only DeepSeek Harness (dsh) models: a `vision` tool with built-in cheap/free VLM presets, multi-image batch analysis, paste-to-hint image admission, and a web settings page with hot-reload.",
   "type": "module",
   "main": "index.js",
